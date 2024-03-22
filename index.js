@@ -25,11 +25,35 @@ async function run() {
 
     const fishesCollection = client.db("grocery").collection("fishes");
 
+    // ==============================================================
+    // Fish COLLECTION
+    // ==============================================================
+
+    // post Fish
+    app.post("/api/v1/fish", async (req, res) => {
+        const newFish = req.body;
+  
+        // Insert supply donation into the database
+        await fishesCollection.insertOne(newFish);
+  
+        res.status(201).json({
+          success: true,
+          message: "Fish inserted successfully",
+        });
+      });
+  
+      // get Fishes
+      app.get("/api/v1/fishes", async (req, res) => {
+        const result = await fishesCollection.find().toArray();
+  
+        res.status(201).json({
+          success: true,
+          message: "Fish retrieved successfully",
+          data: result,
+        });
+      });
 
 
-    // ==============================================================
-    // VOLUNTEERS COLLECTION
-    // ==============================================================
 
     // ==============================================================
     // TESTIMONIALS COLLECTION
