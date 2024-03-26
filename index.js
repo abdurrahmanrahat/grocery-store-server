@@ -45,10 +45,15 @@ async function run() {
     // get Fishes
     app.get("/api/v1/fishes", async (req, res) => {
       let query = {};
+      // console.log(req.query);
 
-      if (req.query.isDiscount) {
-        query.isDiscount = req.query.isDiscount;
+      if (req.query.discount) {
+        query.isDiscount = true;
       }
+
+      // if(req.query.category){
+      //   query.category = req.query.category
+      // }
 
       const result = await fishesCollection.find(query).toArray();
 
