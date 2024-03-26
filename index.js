@@ -31,29 +31,46 @@ async function run() {
 
     // post Fish
     app.post("/api/v1/fish", async (req, res) => {
-        const newFish = req.body;
-  
-        // Insert supply donation into the database
-        await fishesCollection.insertOne(newFish);
-  
-        res.status(201).json({
-          success: true,
-          message: "Fish inserted successfully",
-        });
-      });
-  
-      // get Fishes
-      app.get("/api/v1/fishes", async (req, res) => {
-        const result = await fishesCollection.find().toArray();
-  
-        res.status(201).json({
-          success: true,
-          message: "Fish retrieved successfully",
-          data: result,
-        });
-      });
+      const newFish = req.body;
 
+      // Insert supply donation into the database
+      await fishesCollection.insertOne(newFish);
 
+      res.status(201).json({
+        success: true,
+        message: "Fish inserted successfully",
+      });
+    });
+
+    // get Fishes
+    app.get("/api/v1/fishes", async (req, res) => {
+      let query = {};
+
+      if (req.query.isDiscount) {
+        query.isDiscount = req.query.isDiscount;
+      }
+
+      const result = await fishesCollection.find(query).toArray();
+
+      res.status(201).json({
+        success: true,
+        message: "Fishes retrieved successfully",
+        data: result,
+      });
+    });
+
+    // get single Fish
+    app.get("/api/v1/fishes/:fishId", async (req, res) => {
+      const fishId = req.params.fishId;
+      const query = { _id: new ObjectId(fishId) };
+      const result = await fishesCollection.findOne(query);
+
+      res.status(201).json({
+        success: true,
+        message: "Fish retrieved successfully",
+        data: result,
+      });
+    });
 
     // ==============================================================
     // TESTIMONIALS COLLECTION
