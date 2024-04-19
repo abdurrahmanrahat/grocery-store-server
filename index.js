@@ -3,6 +3,7 @@ const cors = require("cors");
 const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -53,6 +54,34 @@ async function run() {
       res.status(201).json({
         success: true,
         message: "User registered successfully",
+      });
+    });
+
+    // user login
+    app.post("/api/v1/login", async (req, res) => {
+      const { email, password } = req.body;
+
+      // Find user by email
+      const user = await usersCollection.findOne({ email });
+      if (!user) {
+        return res.status(401).json({ message: "Invalid user" });
+      }
+
+      // Compare hashed password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid password" });
+      }
+
+      // generate jwt token
+      const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
+        expiresIn: process.env.EXPIRES_IN,
+      });
+
+      res.json({
+        success: true,
+        message: "Login successfully",
+        token,
       });
     });
 
