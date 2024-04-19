@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config();
+const bcrypt = require("bcrypt");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -24,6 +25,36 @@ async function run() {
     console.log("Connected to MongoDB");
 
     const fishesCollection = client.db("grocery").collection("fishes");
+    const usersCollection = client.db("grocery").collection("users");
+
+    // ==============================================================
+    // USER COLLECTION
+    // ==============================================================
+
+    // user registration
+    app.post("/api/v1/register", async (req, res) => {
+      const { name, email, password } = req.body;
+
+      // check if use already exist
+      const existingUser = await usersCollection.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "User already exists",
+        });
+      }
+
+      // hash the password
+      const hashPassword = await bcrypt.hash(password, 10);
+
+      // insert user into db
+      await usersCollection.insertOne({ name, email, password: hashPassword });
+
+      res.status(201).json({
+        success: true,
+        message: "User registered successfully",
+      });
+    });
 
     // ==============================================================
     // Fish COLLECTION
