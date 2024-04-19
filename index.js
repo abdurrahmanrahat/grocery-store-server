@@ -49,7 +49,12 @@ async function run() {
       const hashPassword = await bcrypt.hash(password, 10);
 
       // insert user into db
-      await usersCollection.insertOne({ name, email, password: hashPassword });
+      await usersCollection.insertOne({
+        name,
+        email,
+        password: hashPassword,
+        role: "user",
+      });
 
       res.status(201).json({
         success: true,
@@ -74,9 +79,13 @@ async function run() {
       }
 
       // generate jwt token
-      const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
-        expiresIn: process.env.EXPIRES_IN,
-      });
+      const token = jwt.sign(
+        { _id: user._id, name: user.name, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.EXPIRES_IN,
+        }
+      );
 
       res.json({
         success: true,
