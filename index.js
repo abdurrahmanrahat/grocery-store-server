@@ -146,6 +146,37 @@ async function run() {
       });
     });
 
+    // edit fish
+    app.patch("/api/v1/fish/:fishId", async (req, res) => {
+      const updatedFish = req.body;
+      const fishId = req.params.fishId;
+      const query = { _id: new ObjectId(fishId) };
+
+      const updateIntoDb = {
+        $set: {
+          image: updatedFish.image,
+          title: updatedFish.title,
+          price: updatedFish.price,
+          ratings: updatedFish.ratings,
+          category: updatedFish.category,
+          isDiscount: updatedFish.isDiscount,
+          discountPercentage: updatedFish.discountPercentage,
+          description: updatedFish.description,
+          features: updatedFish.features,
+        },
+      };
+
+      await fishesCollection.findOneAndUpdate(
+        query,
+        updateIntoDb
+      );
+
+      res.status(201).json({
+        success: true,
+        message: "Fish updated successfully",
+      });
+    });
+
     // delete Fish
     app.delete("/api/v1/fish/:fishId", async (req, res) => {
       const fishId = req.params.fishId;
