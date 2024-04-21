@@ -205,6 +205,23 @@ async function run() {
       });
     });
 
+    // get cart fish products
+    app.get("/api/v1/fishes", async (req, res) => {
+      let query = {};
+
+      if (req.query?.email) {
+        query.email = req.query.email;
+      }
+
+      const result = await cartFishesCollection.find(query).toArray();
+
+      res.status(201).json({
+        success: true,
+        message: "Cart Fishes retrieved successfully",
+        data: result,
+      });
+    });
+
     // ==============================================================
     // TESTIMONIALS COLLECTION
     // ==============================================================
