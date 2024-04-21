@@ -27,6 +27,7 @@ async function run() {
 
     const fishesCollection = client.db("grocery").collection("fishes");
     const usersCollection = client.db("grocery").collection("users");
+    const cartFishesCollection = client.db("grocery").collection("cartFishes");
 
     // ==============================================================
     // USER COLLECTION
@@ -146,7 +147,7 @@ async function run() {
       });
     });
 
-    // edit fish
+    // update fish
     app.patch("/api/v1/fish/:fishId", async (req, res) => {
       const updatedFish = req.body;
       const fishId = req.params.fishId;
@@ -166,10 +167,7 @@ async function run() {
         },
       };
 
-      await fishesCollection.findOneAndUpdate(
-        query,
-        updateIntoDb
-      );
+      await fishesCollection.findOneAndUpdate(query, updateIntoDb);
 
       res.status(201).json({
         success: true,
@@ -187,6 +185,23 @@ async function run() {
       res.status(201).json({
         success: true,
         message: "Fish deleted successfully",
+      });
+    });
+
+    // ==============================================================
+    // Fish COLLECTION
+    // ==============================================================
+
+    // post cart product fish
+    app.post("/api/v1/cartFish", async (req, res) => {
+      const newCartFish = req.body;
+
+      // Insert supply donation into the database
+      await cartFishesCollection.insertOne(newCartFish);
+
+      res.status(201).json({
+        success: true,
+        message: "Add to cart successfully",
       });
     });
 
