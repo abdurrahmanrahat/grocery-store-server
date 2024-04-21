@@ -146,6 +146,19 @@ async function run() {
       });
     });
 
+    // delete Fish
+    app.delete("/api/v1/fish/:fishId", async (req, res) => {
+      const fishId = req.params.fishId;
+      const query = { _id: new ObjectId(fishId) };
+
+      await fishesCollection.findOneAndDelete(query);
+
+      res.status(201).json({
+        success: true,
+        message: "Fish deleted successfully",
+      });
+    });
+
     // ==============================================================
     // TESTIMONIALS COLLECTION
     // ==============================================================
