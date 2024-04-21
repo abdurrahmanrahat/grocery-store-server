@@ -196,8 +196,27 @@ async function run() {
     app.post("/api/v1/cartFish", async (req, res) => {
       const newCartFish = req.body;
 
-      // Insert supply donation into the database
-      await cartFishesCollection.insertOne(newCartFish);
+      const query = {
+        title: newCartFish.title,
+        price: newCartFish.price,
+        email: newCartFish.email,
+      };
+      const alreadyExist = await cartFishesCollection.findOne(query);
+      console.log(alreadyExist);
+      if (alreadyExist?._id) {
+        const updatedCartFish = {
+          $set: {
+            ...alreadyExist,
+            quantity: alreadyExist.quantity ? alreadyExist.quantity + 1 : 2,
+          },
+        };
+        console.log(updatedCartFish);
+
+        await cartFishesCollection.findOneAndUpdate(query, updatedCartFish);
+      } else {
+        // Insert supply donation into the database
+        await cartFishesCollection.insertOne({ ...newCartFish, quantity: 1 });
+      }
 
       res.status(201).json({
         success: true,
@@ -206,7 +225,7 @@ async function run() {
     });
 
     // get cart fish products
-    app.get("/api/v1/fishes", async (req, res) => {
+    app.get("/api/v1/cartFishes", async (req, res) => {
       let query = {};
 
       if (req.query?.email) {
