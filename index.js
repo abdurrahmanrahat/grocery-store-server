@@ -256,14 +256,13 @@ async function run() {
       const cartFishes = req.body;
 
       // delete cart products based on email
-      await cartFishesCollection.deleteMany({email: cartFishes[0].email});
+      await cartFishesCollection.deleteMany({ email: cartFishes[0].email });
 
       // delete _id
-      cartFishes.forEach(item => {
+      cartFishes.forEach((item) => {
         delete item._id;
-        item.status = "Pending"
+        item.status = "Pending";
       });
-      
 
       // post upcoming data into orders collection
       const result = await ordersCollection.insertMany(cartFishes);
@@ -273,24 +272,44 @@ async function run() {
         message: "Proceed checkout successfully complete",
         data: result,
       });
-    })
+    });
 
     // get all orders with email query
-    app.get("/ap/v1/orders", async (req, res) => {
+    app.get("/api/v1/orders", async (req, res) => {
       let query = {};
-      if(req.query.email){
-        query.email = req.query.email
+      if (req.query.email) {
+        query.email = req.query.email;
       }
       console.log(query);
 
-      const result = ordersCollection.find(query).toArray();
+      const result = await ordersCollection.find(query).toArray();
 
       res.status(201).json({
         success: true,
         message: "My orders retrieved successfully",
         data: result,
       });
-    })
+    });
+
+    // update order status
+    app.patch("/api/v1/order/:fishId", async (req, res) => {
+      const updatedFish = req.body;
+      const fishId = req.params.fishId;
+      const query = { _id: new ObjectId(fishId) };
+
+      const updateIntoDb = {
+        $set: {
+          status: updatedFish.status,
+        },
+      };
+
+      await ordersCollection.findOneAndUpdate(query, updateIntoDb);
+
+      res.status(201).json({
+        success: true,
+        message: "Order status updated successfully",
+      });
+    });
 
     // ==============================================================
     // TESTIMONIALS COLLECTION
