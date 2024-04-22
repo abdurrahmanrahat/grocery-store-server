@@ -293,13 +293,14 @@ async function run() {
 
     // update order status
     app.patch("/api/v1/order/:fishId", async (req, res) => {
-      const updatedFish = req.body;
       const fishId = req.params.fishId;
+      const {status} = req.body;
       const query = { _id: new ObjectId(fishId) };
+      console.log("order", status);
 
       const updateIntoDb = {
         $set: {
-          status: updatedFish.status,
+          status: status,
         },
       };
 
