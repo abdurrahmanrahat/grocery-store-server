@@ -28,6 +28,7 @@ async function run() {
     const fishesCollection = client.db("grocery").collection("fishes");
     const usersCollection = client.db("grocery").collection("users");
     const cartFishesCollection = client.db("grocery").collection("cartFishes");
+    const ordersCollection = client.db("grocery").collection("orders");
 
     // ==============================================================
     // USER COLLECTION
@@ -189,7 +190,7 @@ async function run() {
     });
 
     // ==============================================================
-    // Fish COLLECTION
+    // CART Fish COLLECTION
     // ==============================================================
 
     // post cart product fish
@@ -197,23 +198,28 @@ async function run() {
       const newCartFish = req.body;
 
       const query = {
-        title: newCartFish.title,
-        price: newCartFish.price,
-        email: newCartFish.email,
+        $and: [
+          { title: newCartFish.title },
+          { price: newCartFish.price },
+          { email: newCartFish.email },
+        ],
       };
       const alreadyExist = await cartFishesCollection.findOne(query);
-      console.log(alreadyExist);
-      if (alreadyExist?._id) {
+      // console.log(alreadyExist);
+      if (alreadyExist) {
         const updatedCartFish = {
           $set: {
             ...alreadyExist,
             quantity: alreadyExist.quantity ? alreadyExist.quantity + 1 : 2,
           },
         };
-        console.log(updatedCartFish);
+        // console.log(updatedCartFish);
 
         await cartFishesCollection.findOneAndUpdate(query, updatedCartFish);
       } else {
+        // Remove the _id field from newCartFish
+        delete newCartFish._id;
+
         // Insert supply donation into the database
         await cartFishesCollection.insertOne({ ...newCartFish, quantity: 1 });
       }
@@ -240,6 +246,34 @@ async function run() {
         data: result,
       });
     });
+
+    // ==============================================================
+    // ORDERS COLLECTION
+    // ==============================================================
+
+    // post all orders
+    app.post("/api/v1/orders", async (req, res) => {
+      const cartFishes = req.body;
+
+      // delete cart products based on email
+      await cartFishesCollection.deleteMany({email: cartFishes[0].email});
+
+      // delete _id
+      cartFishes.forEach(item => {
+        delete item._id;
+        item.status = "Pending"
+      });
+      
+
+      // post upcoming data into orders collection
+      const result = await ordersCollection.insertMany(cartFishes);
+      console.log(result);
+      res.status(201).json({
+        success: true,
+        message: "Proceed checkout successfully complete",
+        data: result,
+      });
+    })
 
     // ==============================================================
     // TESTIMONIALS COLLECTION
