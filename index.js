@@ -275,6 +275,23 @@ async function run() {
       });
     })
 
+    // get all orders with email query
+    app.get("/ap/v1/orders", async (req, res) => {
+      let query = {};
+      if(req.query.email){
+        query.email = req.query.email
+      }
+      console.log(query);
+
+      const result = ordersCollection.find(query).toArray();
+
+      res.status(201).json({
+        success: true,
+        message: "My orders retrieved successfully",
+        data: result,
+      });
+    })
+
     // ==============================================================
     // TESTIMONIALS COLLECTION
     // ==============================================================
