@@ -230,6 +230,35 @@ async function run() {
       });
     });
 
+    // update cart fish quantity
+    app.patch("/api/v1/cartFish/:fishId", async (req, res) => {
+      const fishId = req.params.fishId;
+      const { quantity } = req.body;
+      const query = { _id: new ObjectId(fishId) };
+      console.log(quantity);
+
+      if (quantity === 0) {
+        await cartFishesCollection.findOneAndDelete(query);
+        return res.status(201).json({
+          success: true,
+          message: "Quantity deleted successfully",
+        });
+      }
+
+      const updateIntoDb = {
+        $set: {
+          quantity: quantity,
+        },
+      };
+
+      await cartFishesCollection.findOneAndUpdate(query, updateIntoDb);
+
+      res.status(201).json({
+        success: true,
+        message: "Quantity updated successfully",
+      });
+    });
+
     // get cart fish products
     app.get("/api/v1/cartFishes", async (req, res) => {
       let query = {};
@@ -294,9 +323,8 @@ async function run() {
     // update order status
     app.patch("/api/v1/order/:fishId", async (req, res) => {
       const fishId = req.params.fishId;
-      const {status} = req.body;
+      const { status } = req.body;
       const query = { _id: new ObjectId(fishId) };
-      console.log("order", status);
 
       const updateIntoDb = {
         $set: {
