@@ -235,7 +235,7 @@ async function run() {
       const fishId = req.params.fishId;
       const { quantity } = req.body;
       const query = { _id: new ObjectId(fishId) };
-      console.log(quantity);
+      // console.log(quantity);
 
       if (quantity === 0) {
         await cartFishesCollection.findOneAndDelete(query);
@@ -295,7 +295,7 @@ async function run() {
 
       // post upcoming data into orders collection
       const result = await ordersCollection.insertMany(cartFishes);
-      console.log(result);
+
       res.status(201).json({
         success: true,
         message: "Proceed checkout successfully complete",
@@ -309,7 +309,7 @@ async function run() {
       if (req.query.email) {
         query.email = req.query.email;
       }
-      console.log(query);
+      // console.log(query);
 
       const result = await ordersCollection.find(query).toArray();
 
